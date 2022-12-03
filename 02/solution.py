@@ -10,10 +10,8 @@ RESULTS = {
 
 with open('input.txt') as fp:
     data = [
-        (ord(a) - 64, ord(b) - 87) for a, b in map(
-            lambda x: tuple(x.split(' ')),
-            [x for x in fp.read().strip().split('\n')],
-        )
+        (ord(a) - 64, ord(b) - 87)
+        for a, b in [tuple(x.split(' ')) for x in fp.read().strip().split('\n')]
     ]
 
 
