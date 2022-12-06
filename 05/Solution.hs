@@ -3,35 +3,25 @@ import Text.Parsec
 
 data Puzzle = Puzzle [[Char]] [(Int, Int, Int)] deriving Show
 
-runPuzzle _ x@(Puzzle _ []) = x
-runPuzzle q x = runPuzzle q (doInstruction x q)
+runPuzzle q (Puzzle stacks instructions) = foldl (move q) stacks instructions
+    where move q s i = map (move' q s i) (zip s [1..])
+          move' q s (n, f, t) (stack, idx) | idx == f = drop n stack
+                                           | idx == t = (q (take n (s !! (f - 1)))) ++ stack
+                                           | otherwise = stack
 
-doInstruction (Puzzle s ((n, f, t):is)) q = Puzzle (map move (zip s [1..])) is
-    where move (stack, idx) | idx == f = drop n stack
-                            | idx == t = (q (take n (s !! (f - 1)))) ++ stack
-                            | otherwise = stack
-
-getStacks (Puzzle s _) = s
-
-parseGrid = (++) <$> (many (normalRow emptyCell)) <*> (many (normalRow normalCell)) <* finalRow
-    where normalRow start = (:) <$> (start <* (char ' '))
-                                <*> (sepBy (normalCell <|> emptyCell) (char ' '))
-                                <* newline
-          finalRow = (sepBy (between (char ' ') (char ' ') digit) (char ' ')) <* newline
-          normalCell = between (char '[') (char ']') letter
-          emptyCell = (\_ -> ' ') <$> count 3 (char ' ')
+parseGrid = (++) <$> (many (row a)) <*> (many (row b)) <* (many (digit <|> (char ' '))  <* newline)
+    where row start = (:) <$> (start <* (char ' ')) <*> (sepBy (a <|> b) (char ' ')) <* newline
+          a = between (char ' ') (char ' ') (char ' ')
+          b = between (char '[') (char ']') letter
 
 parseInstructions = many (instruction <* newline)
     where instruction = (,,) <$> (read <$> (string "move " *> (many digit)))
                              <*> (read <$> (string " from " *> (many digit)))
                              <*> (read <$> (string " to " *> (many digit)))
 
-preparePuzzle (Puzzle s i) = Puzzle (map (\row -> [x | x <- row, x /= ' ']) (transpose s)) i
-
-parser = preparePuzzle <$> (Puzzle <$> (parseGrid <* newline) <*> parseInstructions)
+parser = strip <$> (Puzzle <$> (parseGrid <* newline) <*> parseInstructions)
+    where strip (Puzzle s i) = Puzzle (map (\row -> [x | x <- row, x /= ' ']) (transpose s)) i
 
 solve = ((\(Right x) -> (part1 x, part2 x)) . (parse parser "")) <$> readFile "input.txt"
-
-part1 puzzle = map head (getStacks $ runPuzzle reverse puzzle)
-
-part2 puzzle = map head (getStacks $ runPuzzle id puzzle)
+    where part1 = (map head) . (runPuzzle reverse)
+          part2 = (map head) . (runPuzzle id)
