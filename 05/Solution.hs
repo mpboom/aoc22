@@ -1,7 +1,7 @@
 import Data.List
 import Text.Parsec
 
-data Puzzle = Puzzle [[Char]] [(Int, Int, Int)] deriving Show
+data Puzzle = Puzzle [[Char]] [(Int, Int, Int)]
 
 runPuzzle q (Puzzle stacks instructions) = foldl (move q) stacks instructions
     where move q s i = map (move' q s i) (zip s [1..])
