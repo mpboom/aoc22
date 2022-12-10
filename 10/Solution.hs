@@ -15,4 +15,4 @@ solve = do
     (Right x) <- (parse parser "") <$> readFile "input.txt"
     points <- return [0, 40, 80, 120, 160, 200]
     putStrLn $ show $ sum [(atCycle x (y + 20)) * (y + 20) | y <- points]
-    putStrLn $ (concat . (map ((++ "\n")))) [(take 40) . (drop y) $ draw x | y <- points]
+    putStrLn $ (concat . (map (++ "\n"))) [(take 40) . (drop y) $ draw x | y <- points]
