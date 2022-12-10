@@ -13,11 +13,8 @@ score d = sum (map scorePerMatch d)
                                | b == (a `mod` 3) + 1 = 6 + b
                                | otherwise = b
 
-parse :: String -> [(Int, Int)]
 parse raw = map (\x -> (ord (x !! 0) - 64, ord (x !! 2) - 87)) (lines raw)
 
 solve = ((\x -> (part1 x, part2 x)) . parse) <$> readFile "input.txt"
-
-part1 = score
-
-part2 = score . (map updateResult)
+    where part1 = score
+          part2 = score . (map updateResult)
